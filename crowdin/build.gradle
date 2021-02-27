@@ -2,10 +2,18 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: '../jacoco.gradle'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenCentral()
+    google()
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
 
 ext {
-    libraryVersionCode = 17
-    libraryVersionName = "1.4.1"
+    libraryVersionCode = 18
+    libraryVersionName = "1.4.2"
 
     publishedGroupId = 'com.crowdin.platform'
     libraryName = 'CrowdinAndroidSdk'
@@ -26,6 +34,9 @@ ext {
     licenseUrl = 'https://opensource.org/licenses/MIT'
     allLicenses = ["MIT"]
 }
+
+group = publishedGroupId
+version = libraryVersionName
 
 android {
     compileSdkVersion 29
@@ -73,7 +84,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30"
     }
 }
 
@@ -116,5 +127,41 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-apply from: 'install.gradle'
-apply from: 'maven.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = publishedGroupId
+                artifactId = artifact
+                version = libraryVersionName
+            }
+
+            mavenJava(MavenPublication) {
+                pom {
+                    name = libraryName
+                    description = libraryDescription
+                    url = siteUrl
+                    licenses {
+                        license {
+                            name = licenseName
+                            url = licenseUrl
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = developerId
+                            name = developerName
+                            email = developerEmail
+                        }
+                    }
+                    scm {
+                        connection = gitUrl
+                        developerConnection = gitUrl
+                        url = siteUrl
+                    }
+                }
+            }
+        }
+    }
+}

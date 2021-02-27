@@ -1,12 +1,20 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenCentral()
+    google()
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
 
 ext {
-    libraryVersionCode = 2
-    libraryVersionName = "1.0.1"
+    libraryVersionCode = 3
+    libraryVersionName = "1.0.2"
 
-    publishedGroupId = 'com.crowdin.platform'
+    publishedGroupId = 'com.crowdin.control'
     libraryName = 'CrowdinControlsSdk'
     artifact = 'controls'
 
@@ -25,6 +33,9 @@ ext {
     licenseUrl = 'https://opensource.org/licenses/MIT'
     allLicenses = ["MIT"]
 }
+
+group = publishedGroupId
+version = libraryVersionName
 
 android {
     compileSdkVersion 29
@@ -67,8 +78,43 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-
 }
 
-apply from: 'install.gradle'
-apply from: 'maven.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = publishedGroupId
+                artifactId = artifact
+                version = libraryVersionName
+            }
+
+            mavenJava(MavenPublication) {
+                pom {
+                    name = libraryName
+                    description = libraryDescription
+                    url = siteUrl
+                    licenses {
+                        license {
+                            name = licenseName
+                            url = licenseUrl
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = developerId
+                            name = developerName
+                            email = developerEmail
+                        }
+                    }
+                    scm {
+                        connection = gitUrl
+                        developerConnection = gitUrl
+                        url = siteUrl
+                    }
+                }
+            }
+        }
+    }
+}
